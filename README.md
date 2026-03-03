@@ -12,27 +12,11 @@ Open source .NET API for storing and serving Playwright test reports and artifac
 
 ## Quick Start (Docker Compose)
 
-Create `docker-compose.yml`:
-
-```yaml
-services:
-  playwright-report-server:
-    image: nyffels/playwright-report-server:latest
-    container_name: playwright-report-server
-    ports:
-      - "8080:8080"
-    volumes:
-      - playwright-report-data:/data
-    restart: unless-stopped
-
-volumes:
-  playwright-report-data:
-```
-
-Run:
+Use the included [`docker-compose.yml`](docker-compose.yml).
+Set the endpoint write token directly in Compose via `ENDPOINT_WRITE_API_KEY`:
 
 ```bash
-docker compose up -d
+ENDPOINT_WRITE_API_KEY=your-strong-secret docker compose up -d
 ```
 
 API base URL: `http://localhost:8080`
@@ -73,6 +57,13 @@ Configure the key using:
 
 ```bash
 EndpointSecurity__WriteApiKey=your-strong-secret
+```
+
+In Docker Compose this is wired through:
+
+```yaml
+environment:
+  EndpointSecurity__WriteApiKey: ${ENDPOINT_WRITE_API_KEY:-change-me-in-production}
 ```
 
 Send it in the request header:

@@ -1,0 +1,14 @@
+services:
+  playwright-report-server:
+    image: nyffels/playwright-report-server:latest
+    container_name: playwright-report-server
+    ports:
+      - "8080:8080"
+    environment:
+      EndpointSecurity__WriteApiKey: ${ENDPOINT_WRITE_API_KEY:-change-me-in-production}
+    volumes:
+      - playwright-report-data:/data
+    restart: unless-stopped
+
+volumes:
+  playwright-report-data:
