@@ -1,0 +1,10 @@
+# Docker Scout temporary CVE allowlist.
+# One CVE per line. Remove entries once upstream base image provides a fix.
+CVE-2016-2781
+CVE-2022-3219
+CVE-2024-2236
+CVE-2024-56433
+CVE-2025-45582
+CVE-2025-5222
+CVE-2025-68972
+CVE-2025-8941

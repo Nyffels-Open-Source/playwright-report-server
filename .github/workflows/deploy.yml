@@ -135,7 +135,14 @@ jobs:
 
           docker scout cves "$IMAGE_REF" --only-severity critical,high --format sarif > scout.sarif || true
 
-          ALLOWED_JSON="$(printf '%s\n' "${ALLOWED_CVES[@]}" | jq -R . | jq -s .)"
+          ALLOWED_CVES=()
+          if [[ -f ".scoutignore" ]]; then
+            while IFS= read -r cve; do
+              [[ -z "$cve" || "$cve" =~ ^# ]] && continue
+              ALLOWED_CVES+=("$cve")
+            done < .scoutignore
+          fi
+          ALLOWED_JSON="$(printf '%s\n' "${ALLOWED_CVES[@]-}" | awk 'NF' | jq -R . | jq -s .)"
           BLOCKING_COUNT="$(jq --argjson allowed "$ALLOWED_JSON" '[.runs[].results[]? | select((.ruleId as $id | $allowed | index($id)) | not)] | length' scout.sarif)"
 
           if [[ "$BLOCKING_COUNT" -gt 0 ]]; then
@@ -178,7 +185,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          NON_BLOCKING_COUNT="$(jq '[.runs[].results[]?] | length' scout-nonblocking.sarif)"
+
+          ALLOWED_CVES=()
+          if [[ -f ".scoutignore" ]]; then
+            while IFS= read -r cve; do
+              [[ -z "$cve" || "$cve" =~ ^# ]] && continue
+              ALLOWED_CVES+=("$cve")
+            done < .scoutignore
+          fi
+          ALLOWED_JSON="$(printf '%s\n' "${ALLOWED_CVES[@]-}" | awk 'NF' | jq -R . | jq -s .)"
+
+          NON_BLOCKING_COUNT="$(jq --argjson allowed "$ALLOWED_JSON" '[.runs[].results[]? | select((.ruleId as $id | $allowed | index($id)) | not)] | length' scout-nonblocking.sarif)"
           echo "Docker Scout non-blocking findings count: ${NON_BLOCKING_COUNT}"
           if [[ "$NON_BLOCKING_COUNT" -gt 0 ]]; then
             echo "Docker Scout non-blocking findings detected: ${NON_BLOCKING_COUNT}"
@@ -186,9 +203,10 @@ jobs:
             echo "|---|---|"
             jq -r '
               .runs[].results[]?
+              | select((.ruleId as $id | $allowed | index($id)) | not)
               | [(.ruleId // "n/a"), ((.message.text // "n/a") | gsub("[\r\n]+"; " ") | gsub("[|]"; "/"))]
               | @tsv
-            ' scout-nonblocking.sarif \
+            ' --argjson allowed "$ALLOWED_JSON" scout-nonblocking.sarif \
               | sort -u \
               | while IFS=$'\t' read -r cve summary; do
                   printf '| %s | %s |\n' "$cve" "$summary"
