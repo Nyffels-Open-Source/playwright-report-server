@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playwright Reports</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; background: #f7f7f7; color: #1f2937; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { border: 1px solid #e5e7eb; padding: 0.6rem; text-align: left; }
+    th { background: #f3f4f6; }
+    a { color: #1d4ed8; }
+  </style>
+</head>
+<body>
+<h1>Playwright Reports</h1>
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Branch</th>
+    <th>Commit</th>
+    <th>Environment</th>
+    <th>Status</th>
+    <th>Created (UTC)</th>
+    <th>Report</th>
+  </tr>
+  </thead>
+  <tbody id="reports"></tbody>
+</table>
+
+<script>
+  async function loadReports() {
+    const res = await fetch('/api/reports');
+    if (!res.ok) {
+      document.getElementById('reports').innerHTML = '<tr><td colspan="8">Failed to load reports</td></tr>';
+      return;
+    }
+
+    const data = await res.json();
+    const rows = data.map(report => `
+      <tr>
+        <td>${report.id}</td>
+        <td>${report.name ?? ''}</td>
+        <td>${report.branch ?? ''}</td>
+        <td>${report.commitSha ?? ''}</td>
+        <td>${report.environment ?? ''}</td>
+        <td>${report.status}</td>
+        <td>${report.createdAtUtc}</td>
+        <td><a href="${report.viewUrl}" target="_blank" rel="noopener">open</a></td>
+      </tr>`).join('');
+
+    document.getElementById('reports').innerHTML = rows || '<tr><td colspan="8">No reports</td></tr>';
+  }
+
+  loadReports();
+</script>
+</body>
+</html>

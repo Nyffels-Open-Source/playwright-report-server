@@ -1,0 +1,34 @@
+# VCS
+.git
+.gitignore
+
+# Docker / Compose files not needed in build context
+**/.dockerignore
+**/docker-compose*
+**/Dockerfile*
+
+# Environment / local config
+**/.env
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/.vscode
+**/.idea
+**/*.*proj.user
+**/*.dbmdl
+**/*.jfm
+**/azds.yaml
+**/secrets.dev.yaml
+**/values.dev.yaml
+
+# Build artifacts
+**/bin
+**/obj
+**/node_modules
+**/npm-debug.log
+
+# Docs and repo metadata not required for image build
+LICENSE
+README.md
+
