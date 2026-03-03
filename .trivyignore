@@ -1,0 +1,2 @@
+# Trivy ignore list (CVE IDs), one per line.
+# Keep empty by default; add entries only with documented justification.
