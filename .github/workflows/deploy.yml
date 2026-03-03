@@ -40,7 +40,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: /infra/Dockerfile
+          context: .
+          file: infra/Dockerfile
           pull: true
           push: true
           sbom: true
